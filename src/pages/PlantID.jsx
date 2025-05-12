@@ -10,10 +10,17 @@ import PredictionResult from "../components/PredictionResult";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 const PlantID = () => {
+  const models = [
+    { value: "resnet", name: "Res Net 50" },
+    { value: "efficientnet", name: "Efficient Net B0" },
+    { value: "mobilenet", name: "Mobile Net" },
+  ];
+
   const [selectedImage, setSelectedImage] = useState(null);
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedModel, setSelectedModel] = useState(models[0].value);
 
   const location = useLocation();
   const dispatch = useDispatch();
@@ -45,7 +52,9 @@ const PlantID = () => {
 
     try {
       // Dispatch the action to identify the plant
-      const result = await dispatch(identifyPlant(selectedImage)).unwrap();
+      const result = await dispatch(
+        identifyPlant({ imageFile: selectedImage, modelName: selectedModel })
+      ).unwrap();
       setPrediction(result);
     } catch (err) {
       setError(err.message || "Failed to identify plant. Please try again.");
@@ -87,7 +96,7 @@ const PlantID = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12 relative z-10"
+          className="text-center mb-8 relative z-10"
         >
           <div className="inline-block mb-4">
             <div className="bg-green-100 p-3 rounded-full">
@@ -115,6 +124,20 @@ const PlantID = () => {
             you, providing detailed information and care instructions.
           </p>
         </motion.div>
+
+        <div className="flex mb-8">
+          <select
+            value={selectedModel}
+            onChange={(e) => setSelectedModel(e.target.value)}
+            className="w-52 mx-auto p-3 text-base border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            {models.map((model, index) => (
+              <option key={index} value={model.value} className="text-center">
+                {model.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {!prediction && (
           <motion.div

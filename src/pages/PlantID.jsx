@@ -125,11 +125,11 @@ const PlantID = () => {
           </p>
         </motion.div>
 
-        <div class="flex mb-8">
+        <div className="flex mb-8">
           <select
             value={selectedModel}
             onChange={(e) => setSelectedModel(e.target.value)}
-            class="w-52 mx-auto p-3 text-base border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-52 mx-auto p-3 text-base border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
           >
             {models.map((model, index) => (
               <option key={index} value={model.value} className="text-center">

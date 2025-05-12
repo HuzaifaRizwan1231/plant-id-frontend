@@ -1,20 +1,22 @@
-"use client"
+"use client";
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import { Provider } from "react-redux"
-import { store } from "./store"
-import Navbar from "./components/Navbar"
-import Footer from "./components/Footer"
-import Home from "./pages/Home"
-import PlantID from "./pages/PlantID"
-import History from "./pages/History"
-import ProtectedRoute from "./components/ProtectedRoute"
-import { AnimatePresence } from "framer-motion"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Provider } from "react-redux";
+import { store } from "./store";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import Home from "./pages/Home";
+import PlantID from "./pages/PlantID";
+import History from "./pages/History";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AnimatePresence } from "framer-motion";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <Provider store={store}>
       <Router>
+        <ScrollToTop />
         <div className="min-h-screen flex flex-col bg-green-50">
           <Navbar />
           <main className="flex-grow">
@@ -37,7 +39,7 @@ function App() {
         </div>
       </Router>
     </Provider>
-  )
+  );
 }
 
-export default App
+export default App;

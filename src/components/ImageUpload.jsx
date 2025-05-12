@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 
 const ImageUpload = ({ onImageSelect }) => {
@@ -80,7 +80,7 @@ const ImageUpload = ({ onImageSelect }) => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: "environment",
+            facingMode: "user",
             width: { ideal: 1280 },
             height: { ideal: 720 },
           },
@@ -89,6 +89,7 @@ const ImageUpload = ({ onImageSelect }) => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           videoRef.current.play();
+          videoRef.current.style.transform = "scaleX(-1)";
         }
 
         setCameraStream(stream);
@@ -120,8 +121,14 @@ const ImageUpload = ({ onImageSelect }) => {
           });
           handleFile(file);
 
-          // Don't turn off camera immediately to allow user to take multiple photos
-          // Just show a success message
+          if (showCamera) {
+            // Stop camera
+            if (cameraStream) {
+              cameraStream.getTracks().forEach((track) => track.stop());
+              setCameraStream(null);
+            }
+            setShowCamera(false);
+          }
           setPreviewImage(URL.createObjectURL(blob));
           onImageSelect(file);
         }
@@ -190,77 +197,85 @@ const ImageUpload = ({ onImageSelect }) => {
             </motion.div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleButtonClick}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center"
-            >
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+          {!showCamera && (
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleButtonClick}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center cursor-pointer"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                ></path>
-              </svg>
-              Upload Image
-            </motion.button>
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                Upload Image
+              </motion.button>
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleCameraToggle}
-              className="px-4 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors flex items-center justify-center"
-            >
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCameraToggle}
+                className="px-4 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors flex items-center justify-center cursor-pointer"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                ></path>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                ></path>
-              </svg>
-              {showCamera ? "Close Camera" : "Use Camera"}
-            </motion.button>
-          </div>
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                  ></path>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                  ></path>
+                </svg>
+                Use Camera
+              </motion.button>
+            </div>
+          )}
 
-          {showCamera && (
-            <div className="mt-4 relative">
-              <div className="rounded-lg overflow-hidden bg-black border-4 border-green-500">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  className="w-full h-auto"
-                  style={{ maxHeight: "50vh" }}
-                />
+          <div className={`${!showCamera && "hidden"} mt-4 relative`}>
+            <div className="rounded-lg overflow-hidden bg-black border-4 border-green-500">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                className="w-full h-auto"
+                style={{ maxHeight: "50vh" }}
+              />
+            </div>
 
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+            {cameraError ? (
+              <div className="p-3 mt-2 rounded-md bg-red-50 text-red-500 text-sm">
+                {cameraError}
+              </div>
+            ) : (
+              <>
+                <div className="pt-2 flex justify-center">
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={captureImage}
-                    className="px-6 py-3 bg-white text-green-600 rounded-full shadow-lg hover:bg-green-50 transition-colors flex items-center"
+                    className="px-6 py-3 bg-white text-green-600 rounded-full shadow-lg hover:bg-green-50 transition-colors flex items-center cursor-pointer"
                   >
                     <svg
                       className="w-6 h-6 mr-2"
@@ -285,19 +300,12 @@ const ImageUpload = ({ onImageSelect }) => {
                     Capture
                   </motion.button>
                 </div>
-              </div>
-
-              {cameraError ? (
-                <div className="p-3 mt-2 rounded-md bg-red-50 text-red-500 text-sm">
-                  {cameraError}
-                </div>
-              ) : (
                 <div className="mt-3 flex justify-between">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleCameraToggle}
-                    className="px-4 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
+                    className="px-4 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors cursor-pointer"
                   >
                     Close Camera
                   </motion.button>
@@ -309,22 +317,31 @@ const ImageUpload = ({ onImageSelect }) => {
                       if (cameraStream) {
                         // Switch camera if available
                         const currentTrack = cameraStream.getVideoTracks()[0];
+                        const facingMode =
+                          currentTrack.getSettings().facingMode;
                         currentTrack.stop();
 
                         navigator.mediaDevices
                           .getUserMedia({
                             video: {
                               facingMode:
-                                currentTrack.getSettings().facingMode ===
-                                "environment"
+                                facingMode === "environment"
                                   ? "user"
                                   : "environment",
+                              width: { ideal: 1280 },
+                              height: { ideal: 720 },
                             },
                           })
                           .then((newStream) => {
                             if (videoRef.current) {
                               videoRef.current.srcObject = newStream;
                               setCameraStream(newStream);
+
+                              // invert video on front camera
+                              videoRef.current.style.transform =
+                                currentTrack.getSettings().facingMode === "user"
+                                  ? "scaleX(-1)"
+                                  : "scaleX(1)";
                             }
                           })
                           .catch((err) => {
@@ -332,14 +349,14 @@ const ImageUpload = ({ onImageSelect }) => {
                           });
                       }
                     }}
-                    className="px-4 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors"
+                    className="px-4 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors cursor-pointer"
                   >
                     Switch Camera
                   </motion.button>
                 </div>
-              )}
-            </div>
-          )}
+              </>
+            )}
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
